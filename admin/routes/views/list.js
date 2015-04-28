@@ -1,6 +1,7 @@
 var keystone = require('../../../');
 var _ = require('underscore');
 var querystring = require('querystring');
+var awsUrlGenerator = require('../../../lib/awsUrlGenerator');
 
 exports = module.exports = function(req, res) {
 
@@ -111,6 +112,10 @@ exports = module.exports = function(req, res) {
 
 			var appName = keystone.get('name') || 'Keystone';
 
+			req.list.helpers  = {
+				awsUrlGenerator: awsUrlGenerator
+			};
+
 			keystone.render(req, res, 'list', _.extend(viewLocals, {
 				section: keystone.nav.by.list[req.list.key] || {},
 				title: appName + ': ' + req.list.plural,
@@ -168,7 +173,7 @@ exports = module.exports = function(req, res) {
 			});
 		})();
 
-	} else if (!req.list.get('nodelete') && req.query['delete']) { //eslint-disable-line dot-notation
+	}  else if (!req.list.get('nodelete') && req.query['delete']) {
 
 		if (!checkCSRF()) return renderView();
 

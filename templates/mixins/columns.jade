@@ -61,7 +61,10 @@ mixin column_html(value)
 	div.col-value!= value
 
 mixin column_basic(value)
-	div.col-value= value
+	if (value && value.indexOf('s3-ap-southeast-1.amazonaws.com')!== -1)
+		+column_link('Open Link', list.helpers.awsUrlGenerator.generate(value), true)
+	else
+		div.col-value= value
 
 mixin column_color(value)
 	div.col-value
