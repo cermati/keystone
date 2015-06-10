@@ -16,7 +16,9 @@ exports = module.exports = {
 					if (result.error) {
 						res.send({ error: { message: result.error.message } });
 					} else {
-						res.send({ image: { url: result.url } });
+						var imageOption = keystone.get('wysiwyg cloudinary images option') || {};
+						var imageUrl = cloudinary.url(result.public_id, imageOption);
+						res.send({ image: { url: imageUrl } });
 					}
 				};
 				
