@@ -163,6 +163,9 @@ block content
 									input(type='search', name='search', placeholder='Search #{list.plural.toLowerCase()}', value=search).form-control.js-search-list.searchbox-input
 									if search
 										a(href='/keystone/#{list.path}', title='Clear search').search-list-clear &times;
+									if list.path == 'users'
+										input(type='checkbox', name='searchFlag', checked=(searchFlag || false)).js-search-flag
+										| Use Regex
 								.searchbox-button: button(type='submit').btn.btn-default.btn-search.searchbox-submit
 									span.visible-xs Go
 									span.hidden-xs Search
