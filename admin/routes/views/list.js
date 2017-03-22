@@ -13,7 +13,7 @@ exports = module.exports = function(req, res) {
 	var sort = { by: req.query.sort || req.list.defaultSort };
 	var filters = req.list.processFilters(req.query.q);
 	var cleanFilters = {};
-	var queryFilters = req.list.getSearchFilters(req.query.search, filters, (req.query.searchFlag || false));
+	var queryFilters = req.list.getSearchFilters(req.query.search, filters, req.query.searchWithRegex);
 	var columns = (req.query.cols) ? req.list.expandColumns(req.query.cols) : req.list.defaultColumns;
 
 	_.each(filters, function(filter, path) {
@@ -126,7 +126,7 @@ exports = module.exports = function(req, res) {
 				sort: sort,
 				filters: cleanFilters,
 				search: req.query.search,
-				searchFlag: req.query.searchFlag,
+				searchWithRegex: req.query.searchWithRegex,
 				columns: columns,
 				colPaths: _.pluck(columns, 'path'),
 				items: items,

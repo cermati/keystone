@@ -166,7 +166,7 @@ jQuery(function($) {
 		
 		var filterQueryString = [],
 			search = $(this).find('.js-search-list').val(),
-			searchFlag = $(this).find('.js-search-flag').is(':checked'),
+			searchWithRegex = $(this).find('.js-search-flag').is(':checked'),
 			cancelled = false;
 		
 		$(this).find('.filter.active').each(function() {
@@ -262,7 +262,7 @@ jQuery(function($) {
 		if (cancelled === false) {
 			$.addSearchParam({
 				search: search || undefined,
-				searchFlag: searchFlag || undefined,
+				searchWithRegex: searchWithRegex || undefined,
 				q: filterQueryString.join(';') || undefined
 			}, true);
 		}
