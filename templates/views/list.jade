@@ -163,9 +163,6 @@ block content
 									input(type='search', name='search', placeholder='Search #{list.plural.toLowerCase()}', value=search).form-control.js-search-list.searchbox-input
 									if search
 										a(href='/keystone/#{list.path}', title='Clear search').search-list-clear &times;
-									
-									input(type='checkbox', name='searchWithRegex', checked=(searchWithRegex || false)).js-search-flag
-									| Use Regex
 								.searchbox-button: button(type='submit').btn.btn-default.btn-search.searchbox-submit
 									span.visible-xs Go
 									span.hidden-xs Search
@@ -219,7 +216,9 @@ block content
 										li: a(href=link_to({ cols: undefined }))
 											span.ion-close.icon
 											span Reset to default
-			
+			.use-regex-checkbox-field
+				input(type='checkbox', name='searchWithRegex', checked=(searchWithRegex || false)).js-search-flag
+				= " Use Regex"
 			
 			//-
 			//- List Filters
