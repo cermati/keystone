@@ -128,7 +128,7 @@ Keystone.prototype.adminApp = {
 /* Legacy Attach Mechanisms */
 Keystone.prototype.static = function(app) {
 	if (!this.get('headless')) {
-		app.use('/keystone', Keystone.prototype.adminApp.staticRouter);
+		app.use('/internal/cms/keystone', Keystone.prototype.adminApp.staticRouter);
 	}
 };
 

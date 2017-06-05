@@ -22,7 +22,7 @@ var View = React.createClass({
 	},
 
 	loadItemData: function() {
-		request.get('/keystone/api/' + Keystone.list.path + '/' + this.props.itemId + '?drilldown=true')
+		request.get('/internal/cms/keystone/api/' + Keystone.list.path + '/' + this.props.itemId + '?drilldown=true')
 			.set('Accept', 'application/json')
 			.end((err, res) => {
 				if (err || !res.ok) {

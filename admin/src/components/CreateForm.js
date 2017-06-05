@@ -68,7 +68,7 @@ var Form = React.createClass({
 		var errors = null,
 			form = {},
 			list = this.props.list,
-			formAction = '/keystone/' + list.path,
+			formAction = '/internal/cms/keystone/' + list.path,
 			nameField = this.props.list.nameField,
 			focusRef;
 		

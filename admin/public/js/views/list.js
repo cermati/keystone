@@ -296,7 +296,7 @@ jQuery(function($) {
 			alert(errorMessage);
 			$row.removeClass('delete-inprogress');
 		};
-		$.ajax('/keystone/api/' + Keystone.list.path + '/delete', {
+		$.ajax('/internal/cms/keystone/api/' + Keystone.list.path + '/delete', {
 			data: Keystone.csrf({
 				id: $row.attr('id')
 			}),
@@ -320,7 +320,7 @@ jQuery(function($) {
 				}
 
 				if (Keystone.items.currentPage > Keystone.items.totalPages) {
-					window.location.href = '/keystone/' + Keystone.list.path + '/' + Keystone.items.previous;
+					window.location.href = '/internal/cms/keystone/' + Keystone.list.path + '/' + Keystone.items.previous;
 					return;
 				}
 
@@ -337,7 +337,7 @@ jQuery(function($) {
 						Keystone.items.last = Keystone.items.total;
 						$('.list-pagination .count').text('Showing ' + Keystone.items.first + ' to ' + Keystone.items.last + ' of ' + Keystone.items.total);
 					} else {
-						$.ajax('/keystone/api/' + Keystone.list.path + '/fetch', {
+						$.ajax('/internal/cms/keystone/api/' + Keystone.list.path + '/fetch', {
 							data: Keystone.csrf({
 								items: { 
 									first: Keystone.items.first,

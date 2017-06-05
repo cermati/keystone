@@ -21,7 +21,7 @@ var Item = React.createClass({
 
 		var body = [];
 
-		body.push(<img className='file-icon' src={'/keystone/images/icons/32/' + iconName + '.png'} />);
+		body.push(<img className='file-icon' src={'/internal/cms/keystone/images/icons/32/' + iconName + '.png'} />);
 		body.push(<span className='file-filename'>{filename}</span>);
 
 		if (this.props.size) {

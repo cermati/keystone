@@ -61,7 +61,7 @@ module.exports = Field.create({
 				value: input
 			});
 			superagent
-				.get('/keystone/api/' + self.props.refList.path + '/' + input + '?simple')
+				.get('/internal/cms/keystone/api/' + self.props.refList.path + '/' + input + '?simple')
 				.set('Accept', 'application/json')
 				.end(function (err, res) {
 					if (err) {
@@ -125,7 +125,7 @@ module.exports = Field.create({
 
 	getOptions: function(input, callback) {
 		superagent
-			.get('/keystone/api/' + this.props.refList.path + '/autocomplete?' + this.buildOptionQuery(input))
+			.get('/internal/cms/keystone/api/' + this.props.refList.path + '/autocomplete?' + this.buildOptionQuery(input))
 			.set('Accept', 'application/json')
 			.end(function (err, res) {
 				if (err) throw err;
@@ -168,7 +168,7 @@ module.exports = Field.create({
 			var body = [];
 
 			_.each(this.state.expandedValues, function (item) {
-				body.push(<a href={'/keystone/' + this.props.refList.path + '/' + item.value} className='related-item-link'>{item.label}</a>);
+				body.push(<a href={'/internal/cms/keystone/' + this.props.refList.path + '/' + item.value} className='related-item-link'>{item.label}</a>);
 			}, this);
 
 			return body;
@@ -185,7 +185,7 @@ module.exports = Field.create({
 
 		if (!this.props.many && this.props.value) {
 			body.push(
-				<a href={'/keystone/' + this.props.refList.path + '/' + this.props.value} className='btn btn-link btn-goto-linked-item'>
+				<a href={'/internal/cms/keystone/' + this.props.refList.path + '/' + this.props.value} className='btn btn-link btn-goto-linked-item'>
 					view {this.props.refList.singular.toLowerCase()}
 				</a>
 			);

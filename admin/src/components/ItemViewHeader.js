@@ -91,7 +91,7 @@ var Header = React.createClass({
 		
 		els.push(
 			<li key="back">
-				<a href={'/keystone/' + list.path} title={'Back to ' + list.plural}>
+				<a href={'/internal/cms/keystone/' + list.path} title={'Back to ' + list.plural}>
 					{backIcon}
 					{list.plural}
 				</a>
@@ -108,7 +108,7 @@ var Header = React.createClass({
 		var submitButtonClass = 'btn ' + (this.state.searchIsFocused ? 'btn-primary' : 'btn-default');
 		return (
 			<div className="searchbox" key="search">
-				<form action={'/keystone/' + list.path} className="form-inline searchbox-form">
+				<form action={'/internal/cms/keystone/' + list.path} className="form-inline searchbox-form">
 					<div className="searchbox-field">
 						<input
 							ref="searchField"

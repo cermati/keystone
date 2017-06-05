@@ -15,7 +15,7 @@ mixin column(list, col, item)
 			else
 				- var value = col.subField ? col.subField.format(refData) : refData[col.refPath]
 				if col.refList && refData && refData.id
-					+column_link(value, '/keystone/' + col.refList.path + '/' + refData.id)
+					+column_link(value, '/internal/cms/keystone/' + col.refList.path + '/' + refData.id)
 				else
 					+column_basic(value)
 	else if col.type == 'markdown'
@@ -28,7 +28,7 @@ mixin column(list, col, item)
 	else
 		- var value = col.field ? col.field.format(item) : item.get(col.path)
 		if col.isName
-			+column_link(value || '(no name)', '/keystone/' + list.path + '/' + item.id)
+			+column_link(value || '(no name)', '/internal/cms/keystone/' + list.path + '/' + item.id)
 		else if col.type == 'email'
 			if value && col.field.options.displayGravatar
 				+column_gravatar(col.field.gravatarUrl(item,35))
@@ -53,9 +53,9 @@ mixin column_gravatar(src)
 
 mixin column_boolean(value)
 	if (value)
-		img(src='/keystone/images/icons/16/checkbox-checked.png', width=16, height=16)
+		img(src='/internal/cms/keystone/images/icons/16/checkbox-checked.png', width=16, height=16)
 	else
-		img(src='/keystone/images/icons/16/checkbox-unchecked.png', width=16, height=16)
+		img(src='/internal/cms/keystone/images/icons/16/checkbox-unchecked.png', width=16, height=16)
 
 mixin column_html(value)
 	div.col-value!= value

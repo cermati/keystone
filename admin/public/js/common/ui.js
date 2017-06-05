@@ -64,7 +64,7 @@ jQuery(function($) {
 			order = _.pluck($this.find('tbody tr'), 'id');
 		$.ajax({
 			type: 'POST',
-			url: '/keystone/api/' + listPath + '/order',
+			url: '/internal/cms/keystone/api/' + listPath + '/order',
 			data: Keystone.csrf({
 				order: order.join(',')
 			}),
@@ -102,7 +102,7 @@ jQuery(function($) {
 			allowClear: true,
 			multiple: multi,
 			ajax: {
-				url: '/keystone/api/' + refPath + '/autocomplete',
+				url: '/internal/cms/keystone/api/' + refPath + '/autocomplete',
 				dataType: 'json',
 				quietMillis: 500,
 				data: function(term, page) {
@@ -161,7 +161,7 @@ jQuery(function($) {
 					};
 					
 					$.each(ids, function() {
-						$.ajax('/keystone/api/' + refPath + '/' + this + '?simple', {
+						$.ajax('/internal/cms/keystone/api/' + refPath + '/' + this + '?simple', {
 							dataType: 'json'
 						}).done(loaded);
 					});
@@ -181,7 +181,7 @@ jQuery(function($) {
 				if (val == '') {// eslint-disable-line eqeqeq
 					$gotoLink.hide();
 				} else {
-					$gotoLink.attr('href', '/keystone/' + refPath + '/' + val);
+					$gotoLink.attr('href', '/internal/cms/keystone/' + refPath + '/' + val);
 					$gotoLink.show();
 				}
 			});

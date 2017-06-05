@@ -30,7 +30,7 @@ exports = module.exports = function(req, res) {
 			if (req.query.from && req.query.from.match(/^(?!http|\/\/|javascript).+/)) {
 				var parsed = url.parse(req.query.from);
 				if(parsed.host || parsed.protocol || parsed.auth){
-					res.redirect('/keystone');
+					res.redirect('/internal/cms/keystone');
 				}else{
 					res.redirect(parsed.path);
 				}			
@@ -39,7 +39,7 @@ exports = module.exports = function(req, res) {
 			} else if ('function' === typeof keystone.get('signin redirect')) {
 				keystone.get('signin redirect')(user, req, res);
 			} else {
-				res.redirect('/keystone');
+				res.redirect('/internal/cms/keystone');
 			}
 
 		};
