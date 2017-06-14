@@ -72,8 +72,6 @@ module.exports = function(req,res,params) {
 		req.list.helpers = {
 			awsUrlGenerator: awsUrlGenerator
 		};
-
-		console.log(items);
 		
 		var newLocals=_.extend(viewLocals, {
 			section: keystone.nav.by.list[req.list.key] || {},
