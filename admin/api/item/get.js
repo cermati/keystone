@@ -4,7 +4,7 @@ var keystone = require('../../../');
 
 module.exports = function(req, res) {
 
-	var query = req.list.model.findById(req.params.id);
+    var query = req.list.model.findById(req.params.id);
 
 	var fields = req.query.fields;
 	if (req.query.basic !== undefined) {
@@ -21,12 +21,13 @@ module.exports = function(req, res) {
 
 	query.exec(function(err, item) {
 
+	var tasks = [];
+	var drilldown;
+	var relationships;
 		if (err) return res.status(500).json({ err: 'database error', detail: err });
 		if (!item) return res.status(404).json({ err: 'not found', id: req.params.id });
 
-		var tasks = [];
-		var drilldown;
-		var relationships;
+
 
 		/* Drilldown (optional, provided if ?drilldown=true in querystring) */
 		if (req.query.drilldown === 'true' && req.list.get('drilldown')) {
@@ -38,7 +39,7 @@ module.exports = function(req, res) {
 			tasks.push(function(cb) {
 
 				// TODO: proper support for nested relationships in drilldown
-				
+
 				// step back through the drilldown list and load in reverse order to support nested relationships
 				drilldown.def = drilldown.def.split(' ').reverse();
 
@@ -151,10 +152,12 @@ module.exports = function(req, res) {
 					detail: err
 				});
 			}
+			
 			res.json(_.assign(req.list.getData(item, fields), {
-				drilldown: drilldown,
+				drilldown: drilldown,	
 				relationships: relationships
 			}));
+
 		});
 	});
 };

@@ -8,7 +8,7 @@ exports = module.exports = function(req, res) {
 	var sendResponse = function(status) {
 		res.json(status);
 	};
-
+	
 	var sendError = function(key, err, msg) {
 		msg = msg || 'API Error';
 		key = key || 'unknown error';
@@ -20,9 +20,9 @@ exports = module.exports = function(req, res) {
 		res.status(500);
 		sendResponse({ error: key || 'error', detail: err ? err.message : '' });
 	};
-
+	
 	switch (req.params.action) {
-
+		
 		case 'autocomplete':
 			var limit = req.query.limit || 50;
 			var page = req.query.page || 1;
@@ -56,7 +56,6 @@ exports = module.exports = function(req, res) {
 				query.exec(function(err, items) {
 
 					if (err) return sendError('database error', err);
-
 					sendResponse({
 						total: total,
 						items: items.map(function(i) {
@@ -106,7 +105,7 @@ exports = module.exports = function(req, res) {
 		break;
 
 		case 'create':
-
+			debugger;
 			if (!keystone.security.csrf.validate(req)) {
 				return sendError('invalid csrf');
 			}
@@ -156,18 +155,17 @@ exports = module.exports = function(req, res) {
 				var skip = parseInt(req.query.items.last) - 1;
 				var querystring = require('querystring');
 				var link_to = function(params) {
-						var p = params.page || '';
-						delete params.page;
-						var queryParams = _.clone(req.query.q);
-						for (var i in params) {
-							if (params[i] === undefined) {
-								delete params[i];
-								delete queryParams[i];
-							}
+					var queryParams = _.clone(req.query);
+					for (var i in params) {
+						if (params[i] === undefined) {
+							delete params[i];
+							delete queryParams[i];
 						}
-						params = querystring.stringify(_.defaults(params, queryParams));
-						return '/keystone/' + req.list.path + (p ? '/' + p : '') + (params ? '?' + params : '');
-					};
+					}
+
+					params = querystring.stringify(_.defaults(params, queryParams));
+					return '/keystone/' + req.list.path + (params ? '?' : '') + params;
+				};
 
 				var query = req.list.model.find(queryFilters).sort(req.query.sort).skip(skip).limit(1);
 				var columns = req.list.expandColumns(req.query.cols);

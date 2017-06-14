@@ -1,7 +1,7 @@
 extends ../layout/base
 
 include ../mixins/columns
-
+	
 block css
 	if list.fieldTypes.code
 		link(rel='stylesheet', href='/keystone/js/lib/codemirror/codemirror.css')
@@ -20,6 +20,7 @@ block js_codemirror
 		script(src="/keystone/js/lib/codemirror/codemirror-compressed.js")
 		
 block content
+
 	// Attach point for new React View
 	div#item-view
 	

@@ -1,5 +1,8 @@
 var async = require('async');
 var keystone = require('../../../');
+var Bluebird = require('bluebird');
+var superagent = Bluebird.promisifyAll(require ('superagent'));
+var lodash = require('lodash');
 
 module.exports = function(req, res) {
 	if (!keystone.security.csrf.validate(req)) {
@@ -23,23 +26,58 @@ module.exports = function(req, res) {
 			return res.apiError('not allowed', 'You can not delete yourself');
 		}
 	}
-	var deletedCount = 0;
-	var deletedIds = [];
-	req.list.model.find().where('_id').in(ids).exec(function (err, results) {
-		if (err) return res.apiError('database error', err);
-		async.forEachLimit(results, 10, function(item, next) {
-			item.remove(function (err) {
-				if (err) return next(err);
-				deletedCount++;
-				deletedIds.push(item.id);
-				next();
+	if (req.list.options.useApi){
+		debugger;
+		var s = {};
+		var endpoint = req.list.options.apiDetails.delete.endpoint+'/'+req.body.id;
+		switch(lodash.toUpper(req.list.options.apiDetails.delete.method)){
+			case 'POST':
+				s = superagent.post(endpoint);
+				break;
+			case 'PATCH':
+				s = superagent.patch(endpoint);
+				break;
+			case 'PUT':
+				s = superagent.put(endpoint);
+				break;
+			case 'DELETE':
+				s = superagent.delete(endpoint);
+				break;
+		}
+		
+		s.endAsync()
+			.then(function(result){
+				return res.json({
+					success: true,
+					ids: [req.query.delete],
+					count: 1
+				});
+			})
+			.catch(function(err){
+				req.flash('error', 'Failed delete ' + req.list.singular + ' | ' + err);
+				return res.redirect('/keystone/' + req.list.path);
 			});
-		}, function() {
-			return res.json({
-				success: true,
-				ids: deletedIds,
-				count: deletedCount
+	}
+	else{
+		var deletedCount = 0;
+		var deletedIds = [];
+		req.list.model.find().where('_id').in(ids).exec(function (err, results) {
+			if (err) return res.apiError('database error', err);
+			async.forEachLimit(results, 10, function(item, next) {
+				item.remove(function (err) {
+					if (err) return next(err);
+					deletedCount++;
+					deletedIds.push(item.id);
+					next();
+				});
+			}, function() {
+				return res.json({
+					success: true,
+					ids: deletedIds,
+					count: deletedCount
+				});
 			});
-		});
-	});
+		});	
+	}
+	
 };
