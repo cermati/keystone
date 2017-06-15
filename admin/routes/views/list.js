@@ -166,14 +166,13 @@ exports = module.exports = function(req, res) {
 				.endAsync()
 				.then(function(result){
 					req.flash('success', 'Update ' + req.list.singular + ' success.');
-					return res.redirect('/keystone/' + req.list.path + '/' + req.params.item);
+					return res.redirect('/keystone/' + req.list.path);
 				})
 				.catch(function(err){
 					req.flash('error', 'Failed update ' + req.list.singular + ' | ' + err);
 					return res.redirect('/keystone/' + req.list.path);
 				});
-		}
-		else {
+		} else {
 			req.list.model.findById(req.query['delete']).exec(function (err, item) { //eslint-disable-line dot-notation
 				if (err || !item) return res.redirect('/keystone/' + req.list.path);
 				
@@ -189,7 +188,6 @@ exports = module.exports = function(req, res) {
 				});
 				
 			});
-			
 		}
 		
 		return;

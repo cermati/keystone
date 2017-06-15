@@ -16,8 +16,12 @@ module.exports = function(req,res, params) {
 	var queryFilters=params.queryFilters;
 	var columns=params.columns;
 	var viewLocals=params.viewLocals;
-	var query = req.list.paginate({ filters: queryFilters, page: req.query.page, perPage: req.query.perPage, apiDetails: req.list.options.apiDetails });
-
+	var query = req.list.paginate({ 
+		filters: queryFilters, 
+		page: req.query.page, 
+		perPage: req.query.perPage, 
+		apiDetails: req.list.options.apiDetails
+	});
 	var link_to = function(params) {
 		var queryParams = _.clone(req.query);
 		for (var i in params) {
@@ -70,7 +74,7 @@ module.exports = function(req,res, params) {
 		keystone.render(req, res, 'list', newLocals);
 	})
 	.catch(function(err){
-		req.flash('error', 'Failed connect to API ... ');
+		req.flash('error', 'Something went wrong... ' + err);
 		return res.redirect('/keystone/');
 	});
 	

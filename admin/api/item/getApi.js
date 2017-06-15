@@ -1,12 +1,14 @@
 var _ = require('underscore');
 var async = require('async');
-var keystone = require('../../../');
+//var keystone = require('../../../');
 var Bluebird = require('bluebird');
 var superagent = Bluebird.promisifyAll(require ('superagent'));
+var keystone = require('keystone');
 
 module.exports = function(req, res) {
-
+	
 	var fields = req.query.fields;
+	
 	if (req.query.basic !== undefined) {
 		fields = false;
 	}
@@ -16,13 +18,13 @@ module.exports = function(req, res) {
 
 	superagent
 		.getAsync(endpoint)
-		.then(function(res){
+		.then (function(res) {
 
 			return res.body;
 		})
-		.then(function(item){
+		.then (function(item) {
 
-			item.get=function(colName){
+			item.get = function(colName) {
 				return this[colName];
 			}
 			
@@ -45,10 +47,11 @@ module.exports = function(req, res) {
 			});
 			
 			return;
+			
 		})
 		.bind(this)
 		.catch(function(err){
-			console.log("error calling api...");
+			console.log(err);
 		});
 		
 
