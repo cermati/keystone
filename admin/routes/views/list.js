@@ -260,8 +260,25 @@ exports = module.exports = function(req, res) {
 			postBody=_.omit(postBody,['_csrf','action']);
 
 			var preparedBody = req.list.options.apiDetails.create.prepareRequestData(postBody);
-			superagent.post(req.list.options.apiDetails.create.endpoint)
-				.send(preparedBody)
+			var endpoint = req.list.options.apiDetails.create.endpoint;
+			var s = {};
+			
+			switch(lodash.toUpper(req.list.options.apiDetails.create.method)){
+				case 'POST':
+					s = superagent.post(endpoint);
+					break;
+				case 'PATCH':
+					s = superagent.patch(endpoint);
+					break;
+				case 'PUT':
+					s = superagent.put(endpoint);
+					break;
+				case 'DELETE':
+					s = superagent.delete(endpoint);
+					break;
+			}
+			
+			s.send(preparedBody)
 				.set('Accept', 'application/json')
 				.endAsync()
 				.then(function(result){
@@ -272,7 +289,6 @@ exports = module.exports = function(req, res) {
 					req.flash('error', 'Failed create new ' + req.list.singular + ' | ' + err);
 					return res.redirect('/keystone/' + req.list.path);
 				});
-			
 		}
 		else{
 			item = new req.list.model();
