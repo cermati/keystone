@@ -6,19 +6,38 @@ var Bluebird = require('bluebird');
 var superagent = Bluebird.promisifyAll(require ('superagent'));
 
 exports = module.exports = function(req, res) {
+	console.log(req.params);
 	var apiDetails = req.list.options.apiDetails.read;
 	var endpoint = apiDetails.endpoint+'/'+req.params.item;
 	
 	if (req.method === 'GET') {
+		
 		superagent
 			.getAsync(endpoint)
 			.then(function (res) {
-				return res.body;
+				var responseBody = {};
+				responseBody.data = res.body;
+				responseBody.raw = {
+					operation: 'item'
+				}
+				return responseBody;
+			})
+			.then(function(responseBody){
+				return Bluebird.props({
+					data: Bluebird
+						.resolve()
+						.then( () => req.list.options.apiDetails.read.getResponseData(responseBody))
+					}
+				);
+			})
+			.then( (props) => {
+				return props.data;
 			})
 			.then(function (item) {
 				item.get = function (colName) {
 					return this[colName];
 				}
+				
 				var renderView = function () {
 	
 					var appName = keystone.get('name') || 'Keystone';
@@ -36,11 +55,10 @@ exports = module.exports = function(req, res) {
 				}
 				renderView();
 			})
-			.bind(this)
-			.catch(function () {
-				req.flash('error', 'Error, item with id not found.');
+			.catch(function (err) {
+				req.flash('error', 'Error, item not found ' + err);
 				return res.redirect('/keystone/' + req.list.path)
-			});
+			})
 	}
 	else if (req.method === 'POST' && req.body.action === 'updateItem' && !req.list.get('noedit')) {
 
