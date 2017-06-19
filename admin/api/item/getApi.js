@@ -7,11 +7,11 @@ var keystone = require('keystone');
 
 module.exports = function(req, res) {
 	var fields = req.query.fields;
-
+	
 	if (req.query.basic !== undefined) {
 		fields = false;
 	}
-
+	
 	var apiDetails = req.list.options.apiDetails.read;
 	var endpoint = apiDetails.endpoint + '/' + req.params.id;
 
@@ -30,7 +30,7 @@ module.exports = function(req, res) {
 			item.get = function(colName) {
 				return this[colName];
 			}
-
+			
 			var tasks = [];
 			var drilldown = {};
 			var relationships = {};
@@ -42,15 +42,15 @@ module.exports = function(req, res) {
 						detail: err
 					});
 				}
-
+				
 				res.json(_.assign(req.list.getData(item, fields), {
 					relationships: relationships
 				}));
 
 			});
-
+			
 			return;
-
+			
 		})
 		.catch(function(err) {
 			console.log(err.stack || err);

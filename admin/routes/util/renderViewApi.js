@@ -39,6 +39,22 @@ module.exports = function(req,res, params) {
 	var download_link = '/keystone/download/' + req.list.path;
 	var downloadParams = {};
 
+	if (req.query.q) {
+		downloadParams.q = req.query.q;
+	}
+	if (req.query.search) {
+		downloadParams.search = req.query.search;
+	}
+	if (req.query.cols) {
+		downloadParams.cols = req.query.cols;
+	}
+
+	downloadParams = querystring.stringify(downloadParams);
+
+	if (downloadParams) {
+		download_link += '?' + downloadParams;
+	}
+	
 	downloadParams = querystring.stringify(downloadParams);
 
 	if (downloadParams) {
