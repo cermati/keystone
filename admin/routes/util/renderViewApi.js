@@ -10,12 +10,12 @@ var awsUrlGenerator = require('../../../lib/awsUrlGenerator');
 
 module.exports = function(req,res, params) {
 	
-	var sort=params.sort;
-	var filters=params.filters;
-	var cleanFilters=params.cleanFilters;
-	var queryFilters=params.queryFilters;
-	var columns=params.columns;
-	var viewLocals=params.viewLocals;
+	var sort = params.sort;
+	var filters = params.filters;
+	var cleanFilters = params.cleanFilters;
+	var queryFilters = params.queryFilters;
+	var columns = params.columns;
+	var viewLocals = params.viewLocals;
 	var query = req.list.paginate({ 
 		filters: queryFilters, 
 		page: req.query.page, 
@@ -77,8 +77,4 @@ module.exports = function(req,res, params) {
 		req.flash('error', 'Something went wrong... ' + err);
 		return res.redirect('/keystone/');
 	});
-	
-	
-
-
 };

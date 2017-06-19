@@ -40,7 +40,7 @@ exports = module.exports = function(req, res) {
 							total: _.size(items.results),
 							items: items.results.map(function(i) {
 								return {
-									name: req.list.getDocumentName(i, false) || '(' + i.id + ')',
+									name: req.list.getDocumentName(i, false) || `(${i.id})`,
 									id: i.id
 								};
 							})
@@ -161,7 +161,7 @@ exports = module.exports = function(req, res) {
 		break;
 
 		case 'fetch':
-			if (req.list.options.useApi){
+			if (req.list.options.useApi) {
 				return sendError('API not supported using this operation');;
 			}
 			

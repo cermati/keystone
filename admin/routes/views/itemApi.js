@@ -6,9 +6,8 @@ var Bluebird = require('bluebird');
 var superagent = Bluebird.promisifyAll(require ('superagent'));
 
 exports = module.exports = function(req, res) {
-	console.log(req.params);
 	var apiDetails = req.list.options.apiDetails.read;
-	var endpoint = apiDetails.endpoint+'/'+req.params.item;
+	var endpoint = apiDetails.endpoint + '/' + req.params.item;
 	
 	if (req.method === 'GET') {
 		
@@ -78,17 +77,21 @@ exports = module.exports = function(req, res) {
 		 * so we must concat date and time to be one field
 		 */
 		_.forEach(_.keys(body),function(key){
+			var value = body[key];
 
-			var value=body[key];
-			if (_.contains(key,'_') && (key.indexOf('time')!==-1 || key.indexOf('date')!==-1)){
-				var split=key.split('_');
+			/**
+			 * Concat date and time field, checking if this field is a time or date field
+			 * if true, concat these fields together
+			 */
+			if (_.contains(key,'_') && (key.indexOf('time') !== -1 || key.indexOf('date') !== -1)){
+				var split = key.split('_');
 
-				if (!_.has(postBody,split[0])) postBody[split[0]]=' ';
-				if (split[1]=='time') postBody[split[0]]=postBody[split[0]]+value;
-				if (split[1]=='date') postBody[split[0]]=value+postBody[split[0]];
-			}
-			else{
-				postBody[key]=value;
+				if (!_.has(postBody,split[0])) postBody[split[0]] = ' ';
+				if (split[1] == 'time') postBody[split[0]] = postBody[split[0]] + value;
+				if (split[1] == 'date') postBody[split[0]] = value + postBody[split[0]];
+				
+			} else {
+				postBody[key] = value;
 			}
 		})
 
@@ -98,20 +101,20 @@ exports = module.exports = function(req, res) {
 		 * Call prepareRequestData, it will mapping between our plain javascript obj and payload data to the API
 		 */
 		var preparedBody = req.list.options.apiDetails.update.prepareRequestData(postBody);
-		var s = {};
+		var request;
 		switch(lodash.toUpper(req.list.options.apiDetails.update.method)){
 			case 'POST':
-				s = superagent.post(endpoint);
+				request = superagent.post(endpoint);
 				break;
 			case 'PATCH':
-				s = superagent.patch(endpoint);
+				request = superagent.patch(endpoint);
 				break;
 			case 'PUT':
-				s = superagent.put(endpoint);
+				request = superagent.put(endpoint);
 				break;
 		}
-		
-		s.send(preparedBody)
+
+		request.send(preparedBody)
 			.set('Accept', 'application/json')
 			.endAsync()
 			.then(function(result){
@@ -122,8 +125,6 @@ exports = module.exports = function(req, res) {
 				req.flash('error', 'Failed update ' + req.list.singular + ' | ' + err);
 				return res.redirect('/keystone/' + req.list.path);
 			});
-
-
 	} else {
 		renderView();
 	}

@@ -1,7 +1,6 @@
 var async = require('async');
 
 module.exports = function(req, res) {
-	console.log('boommm');
 	var where = {}; 	
 	var filters = req.query.filters;
 	if (filters && typeof filters === 'string') {

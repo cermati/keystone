@@ -3,9 +3,6 @@ var _ = require('underscore');
 var async = require('async');
 
 exports = module.exports = function(req, res) {
-	debugger;
-
-
 	var itemQuery = req.list.model.findById(req.params.item).select();
 
 	itemQuery.exec(function(err, item) {
@@ -49,8 +46,6 @@ exports = module.exports = function(req, res) {
 				rel.list.selectColumns(q, rel.columns);
 
 				q.exec(function(err, results) {
-
-
 					rel.items = results;
 					done(err);
 				});

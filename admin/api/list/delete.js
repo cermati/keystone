@@ -28,24 +28,24 @@ module.exports = function(req, res) {
 	}
 	if (req.list.options.useApi){
 		debugger;
-		var s = {};
-		var endpoint = req.list.options.apiDetails.delete.endpoint+'/'+req.body.id;
+		var request;
+		var endpoint = req.list.options.apiDetails.delete.endpoint + `/${req.body.id}`;
 		switch(lodash.toUpper(req.list.options.apiDetails.delete.method)){
 			case 'POST':
-				s = superagent.post(endpoint);
+				request = superagent.post(endpoint);
 				break;
 			case 'PATCH':
-				s = superagent.patch(endpoint);
+				request = superagent.patch(endpoint);
 				break;
 			case 'PUT':
-				s = superagent.put(endpoint);
+				request = superagent.put(endpoint);
 				break;
 			case 'DELETE':
-				s = superagent.delete(endpoint);
+				request = superagent.delete(endpoint);
 				break;
 		}
-		
-		s.endAsync()
+
+		request.endAsync()
 			.then(function(result){
 				return res.json({
 					success: true,
@@ -57,8 +57,7 @@ module.exports = function(req, res) {
 				req.flash('error', 'Failed delete ' + req.list.singular + ' | ' + err);
 				return res.redirect('/keystone/' + req.list.path);
 			});
-	}
-	else{
+	} else {
 		var deletedCount = 0;
 		var deletedIds = [];
 		req.list.model.find().where('_id').in(ids).exec(function (err, results) {

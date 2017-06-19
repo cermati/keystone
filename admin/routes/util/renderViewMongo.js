@@ -5,14 +5,15 @@ var keystone = require('../../../');
 var _ = require('underscore');
 var querystring = require('querystring');
 var awsUrlGenerator = require('../../../lib/awsUrlGenerator');
+
 module.exports = function(req,res,params) {
 
-	var sort=params.sort;
-	var filters=params.filters;
-	var cleanFilters=params.cleanFilters;
-	var queryFilters=params.queryFilters;
-	var columns=params.columns;
-	var viewLocals=params.viewLocals;
+	var sort = params.sort;
+	var filters = params.filters;
+	var cleanFilters = params.cleanFilters;
+	var queryFilters = params.queryFilters;
+	var columns = params.columns;
+	var viewLocals = params.viewLocals;
 
 	var query = req.list.paginate({ filters: queryFilters, page: req.query.page, perPage: req.list.get('perPage') }).sort(sort.by);
 

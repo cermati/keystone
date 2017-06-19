@@ -14,16 +14,12 @@ module.exports = function(req, res) {
 	}
 	
 	var apiDetails = req.list.options.apiDetails.read;
-	var endpoint = apiDetails.endpoint+'/'+req.params.id;
+	var endpoint = apiDetails.endpoint + '/' + req.params.id;
 
 	superagent
 		.getAsync(endpoint)
 		.then (function(res) {
-
-			return res.body;
-		})
-		.then (function(item) {
-
+			var item = res.body;
 			item.get = function(colName) {
 				return this[colName];
 			}
@@ -49,9 +45,8 @@ module.exports = function(req, res) {
 			return;
 			
 		})
-		.bind(this)
 		.catch(function(err){
-			console.log(err);
+			console.log(err.stack || err);
 		});
 		
 
