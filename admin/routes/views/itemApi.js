@@ -27,7 +27,7 @@ exports = module.exports = function(req, res) {
 				};
 			})
 			.then(function(responseBody){
-				return req.list.options.apiDetails.read.getResponseData(responseBody).data;
+				return req.list.options.apiDetails.read.getResponseData(responseBody);
 			})
 			.then(function (item) {
 				item.get = function (colName) {
