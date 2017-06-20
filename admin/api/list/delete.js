@@ -26,11 +26,15 @@ module.exports = function(req, res) {
 			return res.apiError('not allowed', 'You can not delete yourself');
 		}
 	}
-	if (req.list.options.useApi){
-		debugger;
+	if (req.list.options.useApi) {
 		var request;
 		var endpoint = req.list.options.apiDetails.delete.endpoint + `/${req.body.id}`;
-		switch(lodash.toUpper(req.list.options.apiDetails.delete.method)){
+
+		/**
+		 * Handle multiple method for deletion, delete is not necessary literally deletion, can be update or etc
+		 * for general purpose
+		 */
+		switch(lodash.toUpper(req.list.options.apiDetails.delete.method)) {
 			case 'POST':
 				request = superagent.post(endpoint);
 				break;
