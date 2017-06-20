@@ -48,12 +48,6 @@ module.exports = function(req,res, params) {
 	if (req.query.cols) {
 		downloadParams.cols = req.query.cols;
 	}
-
-	downloadParams = querystring.stringify(downloadParams);
-
-	if (downloadParams) {
-		download_link += '?' + downloadParams;
-	}
 	
 	downloadParams = querystring.stringify(downloadParams);
 
@@ -68,8 +62,7 @@ module.exports = function(req,res, params) {
 	};
 
 	query.exec().then(function(items){
-		
-		var newLocals=_.extend(viewLocals, {
+		var newLocals = _.extend(viewLocals, {
 			section: keystone.nav.by.list[req.list.key] || {},
 			title: appName + ': ' + req.list.plural,
 			page: 'list',

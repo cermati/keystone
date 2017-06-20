@@ -20,14 +20,13 @@ module.exports = function(req, res) {
 	}
 
 	query.exec(function(err, item) {
-
-	var tasks = [];
-	var drilldown;
-	var relationships;
+		
 		if (err) return res.status(500).json({ err: 'database error', detail: err });
 		if (!item) return res.status(404).json({ err: 'not found', id: req.params.id });
 
-
+		var tasks = [];
+		var drilldown;
+		var relationships;
 
 		/* Drilldown (optional, provided if ?drilldown=true in querystring) */
 		if (req.query.drilldown === 'true' && req.list.get('drilldown')) {

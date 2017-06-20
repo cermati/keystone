@@ -1,9 +1,8 @@
 var _ = require('underscore');
 var async = require('async');
-//var keystone = require('../../../');
+var keystone = require('../../../');
 var Bluebird = require('bluebird');
 var superagent = Bluebird.promisifyAll(require ('superagent'));
-var keystone = require('keystone');
 
 module.exports = function(req, res) {
 	var fields = req.query.fields;
@@ -48,9 +47,6 @@ module.exports = function(req, res) {
 				}));
 
 			});
-			
-			return;
-			
 		})
 		.catch(function(err) {
 			console.log(err.stack || err);

@@ -14,23 +14,20 @@ exports = module.exports = function(req, res) {
 		superagent
 			.getAsync(endpoint)
 			.then(function (res) {
-				var responseBody = {};
-				responseBody.data = res.body;
-				responseBody.raw = {
-					operation: 'item'
-				}
-				return responseBody;
+				/**
+				 * getResponseData parameter accept object {data:..., raw: ....} where data contain res.body from API and raw contains operation detail and etc
+				 * operation='item' is operation where keystone access to get single item with certain ID and
+				 * operation='listing' is operation where keystone access to get list of items 
+				 */
+				return {
+					data: res.body,
+					raw: {
+						operation: 'item'
+					}
+				};
 			})
 			.then(function(responseBody){
-				return Bluebird.props({
-					data: Bluebird
-						.resolve()
-						.then( () => req.list.options.apiDetails.read.getResponseData(responseBody))
-					}
-				);
-			})
-			.then( (props) => {
-				return props.data;
+				return req.list.options.apiDetails.read.getResponseData(responseBody).data;
 			})
 			.then(function (item) {
 				item.get = function (colName) {
@@ -50,7 +47,6 @@ exports = module.exports = function(req, res) {
 						relationships: {},
 						showRelationships: {}
 					});
-					
 				}
 				renderView();
 			})

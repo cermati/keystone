@@ -27,7 +27,7 @@ exports = module.exports = function(req, res) {
 			var page = req.query.page || 1;
 			var skip = limit * (page - 1);
 			
-			if (req.list.options.useApi){
+			if (req.list.options.useApi) {
 				var query = req.list.paginate({ 
 					filters: {}, 
 					page: page, 
