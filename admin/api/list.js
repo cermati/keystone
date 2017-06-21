@@ -162,7 +162,10 @@ exports = module.exports = function(req, res) {
 
 		case 'fetch':
 			if (req.list.options.useApi) {
-				return sendError('API not supported using this operation');;
+				return sendResponse({
+					success: true,
+					count: 1
+				});
 			}
 			
 			if (!keystone.security.csrf.validate(req)) {

@@ -121,7 +121,7 @@ exports = module.exports = function(req, res) {
 
 	}  else if (!req.list.get('nodelete') && req.query['delete']) {
 
-		if (!checkCSRF()) return renderView(req,res,{
+		if (!checkCSRF()) return renderView(req, res, {
 			sort: sort,
 			filters: filters,
 			cleanFilters: cleanFilters,
@@ -132,7 +132,7 @@ exports = module.exports = function(req, res) {
 
 		if (req.query['delete'] === req.user.id) { //eslint-disable-line dot-notation
 			req.flash('error', 'You can\'t delete your own ' + req.list.singular + '.');
-			return renderView(req,res,{
+			return renderView(req, res, {
 				sort: sort,
 				filters: filters,
 				cleanFilters: cleanFilters,
@@ -143,33 +143,33 @@ exports = module.exports = function(req, res) {
 		}
 		
 		//Delete use API directly call the delete endpoint
-		if (req.list.options.useApi){
-			var s = {};
+		if (req.list.options.useApi) {
+			var request = {};
 			var endpoint = req.list.options.apiDetails.delete.endpoint+'/'+req.query.delete;
 			switch(lodash.toUpper(req.list.options.apiDetails.delete.method)){
 				case 'POST':
-					s = superagent.post(endpoint);
+					request = superagent.post(endpoint);
 					break;
 				case 'PATCH':
-					s = superagent.patch(endpoint);
+					request = superagent.patch(endpoint);
 					break;
 				case 'PUT':
-					s = superagent.put(endpoint);
+					request = superagent.put(endpoint);
 					break;
 				case 'DELETE':
-					s = superagent.delete(endpoint);
+					request = superagent.delete(endpoint);
 					break;
 			}
 
-			s.send(preparedBody)
+			request.send(preparedBody)
 				.set('Accept', 'application/json')
 				.endAsync()
 				.then(function(result){
-					req.flash('success', 'Update ' + req.list.singular + ' success.');
+					req.flash('success', 'Delete ' + req.list.singular + ' success.');
 					return res.redirect('/keystone/' + req.list.path);
 				})
 				.catch(function(err){
-					req.flash('error', 'Failed update ' + req.list.singular + ' | ' + err);
+					req.flash('error', 'Failed Delete ' + req.list.singular + ' | ' + err);
 					return res.redirect('/keystone/' + req.list.path);
 				});
 		} else {
@@ -261,31 +261,40 @@ exports = module.exports = function(req, res) {
 
 			var preparedBody = req.list.options.apiDetails.create.prepareRequestData(postBody);
 			var endpoint = req.list.options.apiDetails.create.endpoint;
-			var s = {};
+			var request;
 			
 			switch(lodash.toUpper(req.list.options.apiDetails.create.method)){
 				case 'POST':
-					s = superagent.post(endpoint);
+					request = superagent.post(endpoint);
 					break;
 				case 'PATCH':
-					s = superagent.patch(endpoint);
+					request = superagent.patch(endpoint);
 					break;
 				case 'PUT':
-					s = superagent.put(endpoint);
+					request = superagent.put(endpoint);
 					break;
 				case 'DELETE':
-					s = superagent.delete(endpoint);
+					request = superagent.delete(endpoint);
 					break;
 			}
-			
-			s.send(preparedBody)
+
+			request.send(preparedBody)
 				.set('Accept', 'application/json')
 				.endAsync()
-				.then(function(result){
-					req.flash('success', 'New ' + req.list.singular + ' created.');
-					return res.redirect('/keystone/' + req.list.path + '/' + result.body.result.id);
+				.then(function(result) {
+					debugger;
+					return req.list.options.apiDetails.read.getResponseData({
+						data: result.body,
+						raw: {
+							operation: 'afterCreate'
+						}
+					})[req.list.options.apiDetails.read.primaryKey];
 				})
-				.catch(function(err){
+				.then(function(createdId) {
+					req.flash('success', 'New ' + req.list.singular + ' created.');
+					return res.redirect('/keystone/' + req.list.path + '/' + createdId);
+				})
+				.catch(function(err) {
 					req.flash('error', 'Failed create new ' + req.list.singular + ' | ' + err);
 					return res.redirect('/keystone/' + req.list.path);
 				});
