@@ -1,21 +1,25 @@
 var keystone = require('../../../');
 var _ = require('underscore');
 var querystring = require('querystring');
+var lodash = require('lodash');
 var awsUrlGenerator = require('../../../lib/awsUrlGenerator');
+var Bluebird = require('bluebird');
+var superagent = Bluebird.promisifyAll(require ('superagent'));
 
 exports = module.exports = function(req, res) {
-
+	var options = req.list.options;
 	var viewLocals = {
 		validationErrors: {},
 		showCreateForm: _.has(req.query, 'new')
 	};
-
+	
+	
 	var sort = { by: req.query.sort || req.list.defaultSort };
 	var filters = req.list.processFilters(req.query.q);
 	var cleanFilters = {};
 	var queryFilters = req.list.getSearchFilters(req.query.search, filters, req.query.searchWithRegex);
 	var columns = (req.query.cols) ? req.list.expandColumns(req.query.cols) : req.list.defaultColumns;
-
+	
 	_.each(filters, function(filter, path) {
 		cleanFilters[path] = _.omit(filter, 'field');
 	});
@@ -54,89 +58,15 @@ exports = module.exports = function(req, res) {
 
 	}
 
-	var renderView = function() {
-
-		var query = req.list.paginate({ filters: queryFilters, page: req.params.page, perPage: req.list.get('perPage') }).sort(sort.by);
-
-		req.list.selectColumns(query, columns);
-
-		var link_to = function(params) {
-			var p = params.page || '';
-			delete params.page;
-			var queryParams = _.clone(req.query);
-			for (var i in params) {
-				if (params[i] === undefined) {
-					delete params[i];
-					delete queryParams[i];
-				}
-			}
-			params = querystring.stringify(_.defaults(params, queryParams));
-			return '/keystone/' + req.list.path + (p ? '/' + p : '') + (params ? '?' + params : '');
-		};
-
-		query.exec(function(err, items) {
-
-			if (err) {
-				console.log(err);
-				return res.status(500).send('Error querying items:<br><br>' + JSON.stringify(err));
-			}
-
-			// if there were results but not on this page, reset the page
-			if (req.params.page && items.total && !items.results.length) {
-				return res.redirect('/keystone/' + req.list.path);
-			}
-
-			// go straight to the result if there was a search, and only one result
-			if (req.query.search && items.total === 1 && items.results.length === 1) {
-				return res.redirect('/keystone/' + req.list.path + '/' + items.results[0].id);
-			}
-
-			var download_link = '/keystone/download/' + req.list.path;
-			var downloadParams = {};
-
-			if (req.query.q) {
-				downloadParams.q = req.query.q;
-			}
-			if (req.query.search) {
-				downloadParams.search = req.query.search;
-			}
-			if (req.query.cols) {
-				downloadParams.cols = req.query.cols;
-			}
-
-			downloadParams = querystring.stringify(downloadParams);
-
-			if (downloadParams) {
-				download_link += '?' + downloadParams;
-			}
-
-			var appName = keystone.get('name') || 'Keystone';
-
-			req.list.helpers  = {
-				awsUrlGenerator: awsUrlGenerator
-			};
-
-			keystone.render(req, res, 'list', _.extend(viewLocals, {
-				section: keystone.nav.by.list[req.list.key] || {},
-				title: appName + ': ' + req.list.plural,
-				page: 'list',
-				link_to: link_to,
-				download_link: download_link,
-				list: req.list,
-				sort: sort,
-				filters: cleanFilters,
-				search: req.query.search,
-				searchWithRegex: req.query.searchWithRegex,
-				columns: columns,
-				colPaths: _.pluck(columns, 'path'),
-				items: items,
-				submitted: req.body || {},
-				query: req.query
-			}));
-
-		});
-
-	};
+	var renderView;
+	
+	//Switching between implementation of renderView between using and not using API
+	if (options.useApi){
+		renderView = require('../util/renderViewApi');
+	}
+	else {
+		renderView = require('../util/renderViewMongo');
+	}
 
 	var checkCSRF = function() {
 		var pass = keystone.security.csrf.validate(req);
@@ -149,9 +79,17 @@ exports = module.exports = function(req, res) {
 
 	var item;
 	if ('update' in req.query) {
-
-		if (!checkCSRF()) return renderView();
-
+		if (!checkCSRF()){
+			return renderView(req,res,{
+				sort: sort,
+				filters: filters,
+				cleanFilters: cleanFilters,
+				queryFilters: queryFilters,
+				columns:columns,
+				viewLocals:viewLocals
+			});
+		}
+			
 		(function() {
 			var data = null;
 			if (req.query.update) {
@@ -159,7 +97,14 @@ exports = module.exports = function(req, res) {
 					data = JSON.parse(req.query.update);
 				} catch(e) {
 					req.flash('error', 'There was an error parsing the update data.');
-					return renderView();
+					return renderView(req,res,{
+						sort: sort,
+						filters: filters,
+						cleanFilters: cleanFilters,
+						queryFilters: queryFilters,
+						columns:columns,
+						viewLocals:viewLocals
+					});
 				}
 			}
 			req.list.updateAll(data, function(err) {
@@ -176,33 +121,87 @@ exports = module.exports = function(req, res) {
 
 	}  else if (!req.list.get('nodelete') && req.query['delete']) {
 
-		if (!checkCSRF()) return renderView();
+		if (!checkCSRF()) return renderView(req, res, {
+			sort: sort,
+			filters: filters,
+			cleanFilters: cleanFilters,
+			queryFilters: queryFilters,
+			columns:columns,
+			viewLocals:viewLocals
+		});
 
 		if (req.query['delete'] === req.user.id) { //eslint-disable-line dot-notation
 			req.flash('error', 'You can\'t delete your own ' + req.list.singular + '.');
-			return renderView();
-		}
-
-		req.list.model.findById(req.query['delete']).exec(function (err, item) { //eslint-disable-line dot-notation
-			if (err || !item) return res.redirect('/keystone/' + req.list.path);
-
-			item.remove(function (err) {
-				if (err) {
-					console.log('Error deleting ' + req.list.singular);
-					console.log(err);
-					req.flash('error', 'Error deleting the ' + req.list.singular + ': ' + err.message);
-				} else {
-					req.flash('success', req.list.singular + ' deleted successfully.');
-				}
-				res.redirect('/keystone/' + req.list.path);
+			return renderView(req, res, {
+				sort: sort,
+				filters: filters,
+				cleanFilters: cleanFilters,
+				queryFilters: queryFilters,
+				columns:columns,
+				viewLocals:viewLocals
 			});
-		});
+		}
+		
+		//Delete use API directly call the delete endpoint
+		if (req.list.options.useApi) {
+			var request = {};
+			var endpoint = req.list.options.apiDetails.delete.endpoint+'/'+req.query.delete;
+			switch(lodash.toUpper(req.list.options.apiDetails.delete.method)){
+				case 'POST':
+					request = superagent.post(endpoint);
+					break;
+				case 'PATCH':
+					request = superagent.patch(endpoint);
+					break;
+				case 'PUT':
+					request = superagent.put(endpoint);
+					break;
+				case 'DELETE':
+					request = superagent.delete(endpoint);
+					break;
+			}
 
+			request.send(preparedBody)
+				.set('Accept', 'application/json')
+				.endAsync()
+				.then(function(result){
+					req.flash('success', 'Delete ' + req.list.singular + ' success.');
+					return res.redirect('/keystone/' + req.list.path);
+				})
+				.catch(function(err){
+					req.flash('error', 'Failed Delete ' + req.list.singular + ' | ' + err);
+					return res.redirect('/keystone/' + req.list.path);
+				});
+		} else {
+			req.list.model.findById(req.query['delete']).exec(function (err, item) { //eslint-disable-line dot-notation
+				if (err || !item) return res.redirect('/keystone/' + req.list.path);
+				
+				item.remove(function (err) {
+					if (err) {
+						console.log('Error deleting ' + req.list.singular);
+						console.log(err);
+						req.flash('error', 'Error deleting the ' + req.list.singular + ': ' + err.message);
+					} else {
+						req.flash('success', req.list.singular + ' deleted successfully.');
+					}
+					res.redirect('/keystone/' + req.list.path);
+				});
+				
+			});
+		}
+		
 		return;
 
 	} else if (!req.list.get('nocreate') && req.list.get('autocreate') && _.has(req.query, 'new')) {
-
-		if (!checkCSRF()) return renderView();
+		
+		if (!checkCSRF()) return renderView(req,res,{
+			sort: sort,
+			filters: filters,
+			cleanFilters: cleanFilters,
+			queryFilters: queryFilters,
+			columns:columns,
+			viewLocals:viewLocals
+		});
 
 		item = new req.list.model();
 		item.save(function(err) {
@@ -211,7 +210,15 @@ exports = module.exports = function(req, res) {
 				console.log('There was an error creating the new ' + req.list.singular + ':');
 				console.log(err);
 				req.flash('error', 'There was an error creating the new ' + req.list.singular + '.');
-				renderView();
+				renderView(req,res,{
+					sort: sort,
+					filters: filters,
+					cleanFilters: cleanFilters,
+					queryFilters: queryFilters,
+					columns:columns,
+					viewLocals:viewLocals
+				});
+
 			} else {
 				req.flash('success', 'New ' + req.list.singular + ' ' + req.list.getDocumentName(item) + ' created.');
 				return res.redirect('/keystone/' + req.list.path + '/' + item.id);
@@ -221,36 +228,120 @@ exports = module.exports = function(req, res) {
 
 	} else if (!req.list.get('nocreate') && req.method === 'POST' && req.body.action === 'create') {
 
-		if (!checkCSRF()) return renderView();
-
-		item = new req.list.model();
-		var updateHandler = item.getUpdateHandler(req);
-
-		viewLocals.showCreateForm = true; // always show the create form after a create. success will redirect.
-
-		if (req.list.nameIsInitial) {
-			if (!req.list.nameField.validateInput(req.body, true, item)) {
-				updateHandler.addValidationError(req.list.nameField.path, req.list.nameField.label + ' is required.');
-			}
-			req.list.nameField.updateItem(item, req.body);
-		}
-
-		updateHandler.process(req.body, {
-			// flashErrors: true,
-			logErrors: true,
-			fields: req.list.initialFields
-		}, function(err) {
-			if (err) {
-				viewLocals.createErrors = err;
-				return renderView();
-			}
-			req.flash('success', 'New ' + req.list.singular + ' ' + req.list.getDocumentName(item) + ' created.');
-			return res.redirect('/keystone/' + req.list.path + '/' + item.id);
+		if (!checkCSRF()) return renderView(req,res,{
+			sort: sort,
+			filters: filters,
+			cleanFilters: cleanFilters,
+			queryFilters: queryFilters,
+			columns:columns,
+			viewLocals:viewLocals
 		});
 
+
+		//Create new item directly send form data that already prepared to the endpoint
+		if (req.list.options.useApi){
+			var body = req.body;
+			var postBody = {};
+			_.forEach(_.keys(body),function(key){
+				
+				var value=body[key];
+				if (_.contains(key,'_') && (key.indexOf('time')!==-1 || key.indexOf('date')!==-1)){
+					var split=key.split('_');
+					
+					if (!_.has(postBody,split[0])) postBody[split[0]]=' ';
+					if (split[1]=='time') postBody[split[0]]=postBody[split[0]]+value;
+					if (split[1]=='date') postBody[split[0]]=value+postBody[split[0]];
+				}
+				else{
+					postBody[key]=value;
+				}
+			})
+			
+			postBody=_.omit(postBody,['_csrf','action']);
+
+			var preparedBody = req.list.options.apiDetails.create.prepareRequestData(postBody);
+			var endpoint = req.list.options.apiDetails.create.endpoint;
+			var request;
+			
+			switch(lodash.toUpper(req.list.options.apiDetails.create.method)){
+				case 'POST':
+					request = superagent.post(endpoint);
+					break;
+				case 'PATCH':
+					request = superagent.patch(endpoint);
+					break;
+				case 'PUT':
+					request = superagent.put(endpoint);
+					break;
+				case 'DELETE':
+					request = superagent.delete(endpoint);
+					break;
+			}
+
+			request.send(preparedBody)
+				.set('Accept', 'application/json')
+				.endAsync()
+				.then(function(result) {
+					debugger;
+					return req.list.options.apiDetails.read.getResponseData({
+						data: result.body,
+						raw: {
+							operation: 'afterCreate'
+						}
+					})[req.list.options.apiDetails.read.primaryKey];
+				})
+				.then(function(createdId) {
+					req.flash('success', 'New ' + req.list.singular + ' created.');
+					return res.redirect('/keystone/' + req.list.path + '/' + createdId);
+				})
+				.catch(function(err) {
+					req.flash('error', 'Failed create new ' + req.list.singular + ' | ' + err);
+					return res.redirect('/keystone/' + req.list.path);
+				});
+		}
+		else{
+			item = new req.list.model();
+			var updateHandler = item.getUpdateHandler(req);
+
+			viewLocals.showCreateForm = true; // always show the create form after a create. success will redirect.
+
+			if (req.list.nameIsInitial) {
+				if (!req.list.nameField.validateInput(req.body, true, item)) {
+					updateHandler.addValidationError(req.list.nameField.path, req.list.nameField.label + ' is required.');
+				}
+				req.list.nameField.updateItem(item, req.body);
+			}
+
+			updateHandler.process(req.body, {
+				// flashErrors: true,
+				logErrors: true,
+				fields: req.list.initialFields
+			}, function(err) {
+				if (err) {
+					viewLocals.createErrors = err;
+					return renderView(req,res,{
+						sort: sort,
+						filters: filters,
+						cleanFilters: cleanFilters,
+						queryFilters: queryFilters,
+						columns:columns,
+						viewLocals:viewLocals
+					});
+				}
+				req.flash('success', 'New ' + req.list.singular + ' ' + req.list.getDocumentName(item) + ' created.');
+				return res.redirect('/keystone/' + req.list.path + '/' + item.id);
+			});
+		}
 	} else {
 
-		renderView();
+		renderView(req,res,{
+			sort: sort,
+			filters: filters,
+			cleanFilters: cleanFilters,
+			queryFilters: queryFilters,
+			columns:columns,
+			viewLocals:viewLocals
+		});
 
 	}
 };

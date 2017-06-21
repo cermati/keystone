@@ -1,7 +1,7 @@
 var async = require('async');
 
 module.exports = function(req, res) {
-	var where = {};
+	var where = {}; 	
 	var filters = req.query.filters;
 	if (filters && typeof filters === 'string') {
 		try { filters = JSON.parse(req.query.filters); }

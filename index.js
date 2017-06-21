@@ -166,7 +166,6 @@ keystone.utils = utils;
  */
 
 Keystone.prototype.import = function(dirname) {
-
 	var initialPath = path.join(this.get('module root'), dirname);
 
 	var doImport = function(fromPath) {

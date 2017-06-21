@@ -263,6 +263,7 @@ jQuery(function($) {
 			$.addSearchParam({
 				search: search || undefined,
 				searchWithRegex: searchWithRegex || undefined,
+				page: 1,
 				q: filterQueryString.join(';') || undefined
 			}, true);
 		}

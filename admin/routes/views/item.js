@@ -3,11 +3,10 @@ var _ = require('underscore');
 var async = require('async');
 
 exports = module.exports = function(req, res) {
-
 	var itemQuery = req.list.model.findById(req.params.item).select();
 
 	itemQuery.exec(function(err, item) {
-
+		
 		if (err) {
 			req.flash('error', 'A database error occurred.');
 			return res.redirect('/keystone/' + req.list.path);
@@ -17,7 +16,8 @@ exports = module.exports = function(req, res) {
 			req.flash('error', 'Item ' + req.params.item + ' could not be found.');
 			return res.redirect('/keystone/' + req.list.path);
 		}
-
+		
+	
 		var renderView = function() {
 
 			var relationships = _.values(_.compact(_.map(req.list.relationships, function(i) {
@@ -29,6 +29,7 @@ exports = module.exports = function(req, res) {
 				}
 			})));
 
+			
 			async.each(relationships, function(rel, done) {
 
 				// TODO: Handle invalid relationship config
@@ -52,12 +53,11 @@ exports = module.exports = function(req, res) {
 			}, function(err) { //eslint-disable-line no-unused-vars, handle-callback-err
 
 				// TODO: Handle err
-
 				var showRelationships = _.some(relationships, function(rel) {
 					return rel.items.results.length;
 				});
 
-				var appName = keystone.get('name') || 'Keystone';
+			 	var appName = keystone.get('name') || 'Keystone';
 
 				keystone.render(req, res, 'item', {
 					section: keystone.nav.by.list[req.list.key] || {},
@@ -65,8 +65,8 @@ exports = module.exports = function(req, res) {
 					page: 'item',
 					list: req.list,
 					item: item,
-					relationships: relationships,
-					showRelationships: showRelationships
+					relationships: {},
+					showRelationships: {}
 				});
 
 			});
