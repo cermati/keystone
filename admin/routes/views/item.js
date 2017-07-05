@@ -65,8 +65,8 @@ exports = module.exports = function(req, res) {
 					page: 'item',
 					list: req.list,
 					item: item,
-					relationships: {},
-					showRelationships: {}
+					relationships: relationships,
+					showRelationships: showRelationships
 				});
 
 			});
