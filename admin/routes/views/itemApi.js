@@ -45,7 +45,7 @@ exports = module.exports = function(req, res) {
 						list: req.list,
 						item: item,
 						relationships: {},
-						showRelationships: 0 // Currently not support relationships
+						showRelationships: false // Currently not support relationships
 					});
 				}
 				renderView();
