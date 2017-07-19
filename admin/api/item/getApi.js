@@ -50,5 +50,9 @@ module.exports = function(req, res) {
 		})
 		.catch(function(err) {
 			console.log(err.stack || err);
+			res.json({
+				err: 'database error',
+				detail: err.stack
+			});
 		});
 };
