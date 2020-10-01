@@ -55,7 +55,7 @@
     "letsencrypt-express": "2.0.5",
     "list-to-array": "1.1.0",
     "lodash": "4.16.5",
-    "marked": "0.3.6",
+    "marked": "1.2.0",
     "method-override": "2.3.6",
     "mime-types": "2.1.12",
     "moment": "2.16.0",
